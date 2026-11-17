@@ -1,6 +1,6 @@
 # Deployment preparation
 
-This release is prepared for one persistent Python service. No v2 cloud service/account has been created or deployed. Docker is not installed in the current development environment, so the image/Compose flow is prepared but has not been executed here. The GitHub container job will build and smoke-test it when the new repository's CI runs.
+This release targets one persistent Python service. No public v2 hosting account/service has been created or deployed. Docker is not installed on the development PC. The [first GitHub CI run](https://github.com/phatdat220707/guardcart-v2/actions/runs/44066004627) successfully built the image and passed the container HTTP smoke job; its Windows jobs separately exposed a MIME-type issue. Read [CI findings](github-ci.md) and [current runs](https://github.com/phatdat220707/guardcart-v2/actions/workflows/ci.yml) for subsequent verification.
 
 ## Repeatable Python setup
 

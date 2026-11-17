@@ -82,7 +82,9 @@ The versioned [dataset](evals/cases.json) contains 16 cases: 12 extraction/clari
 
 Reports record hashes, per-case checks, failures, attempts and latency in ignored `reports/`. The runner never approves or checks out. See [evaluation methodology](docs/evaluation.md) and [provider preflight](docs/provider-preflight-2026-11-17.md). Dataset validation is not an evaluation score; a single run cannot establish prompt-injection immunity.
 
-Latest local evidence: **180 Python tests in the pinned environment**, **12 JavaScript tests**, and sampled [desktop/mobile browser QA](docs/browser-qa-2026-11-17.md), including real AI request recovery. The separate application evaluation reached **16/16 after one size-handling repair**; its initial run was 15/16. Reports and limits are preserved in the [verification snapshot](docs/verification-2026-11-17.md). Browser QA used three additional provider attempts; it did not repeat the benchmark.
+Latest local evidence: **182 Python tests in the pinned environment**, **12 JavaScript tests**, and sampled [desktop/mobile browser QA](docs/browser-qa-2026-11-17.md), including real AI request recovery. The separate application evaluation reached **16/16 after one size-handling repair**; its initial run was 15/16. Reports and limits are preserved in the [verification snapshot](docs/verification-2026-11-17.md). Browser QA used three additional provider attempts; it did not repeat the benchmark.
+
+The private [GitHub repository](https://github.com/phatdat220707/guardcart-v2) runs Windows/Linux Python 3.11/3.14 checks and a Docker build/HTTP smoke job. See [current CI runs](https://github.com/phatdat220707/guardcart-v2/actions/workflows/ci.yml) and the [first-run findings](docs/github-ci.md). The initial Windows failure exposed OS-dependent JavaScript MIME types; the server now sets explicit asset types and tests that case.
 
 Additional demos (use the same virtual environment):
 
@@ -102,7 +104,7 @@ The last two require the local server. The Agent smoke permits up to four metere
 - Attempt limits are not a verified USD spending cap. Gateway token/credit reports are not assumed to equal dollars paid. Resetting the database resets local quotas.
 - Anonymous sessions expire after 24 hours by default and have no account recovery. Browser storage contains workspace IDs; the bearer cookie is HttpOnly. Chat history is stored in local SQLite for context.
 - SQLite is appropriate for this single-instance demo. Public hosting, production operations, account authentication and distributed throttling remain future work.
-- Sampled browser flows passed at 1280 px desktop and 390 px mobile emulation. Repeatable browser CI, full accessibility, actual-device and deployment checks remain outstanding. No public v2 URL or remote repository has been created yet.
+- Sampled browser flows passed at 1280 px desktop and 390 px mobile emulation. Repeatable browser CI, full accessibility, actual-device and public-host checks remain outstanding. The repository is private; no public v2 website URL exists yet.
 
 ## Source map
 
@@ -121,4 +123,4 @@ Runtime dependencies: Pydantic, FastAPI, Uvicorn and HTTPX. The frontend uses br
 
 ## Deployment package
 
-See [deployment preparation](docs/deployment.md) for the pinned runtime snapshot, portable entry point, Docker/Compose configuration, mounted AI key and source-only release command. A new host has not been selected. Container execution and public deployment remain unverified; local source packaging does not publish the application.
+See [deployment preparation](docs/deployment.md) for the pinned runtime snapshot, portable entry point, Docker/Compose configuration, mounted AI key and source-only release command. The first GitHub container job built and passed HTTP smoke. A public host has not been selected; public HTTPS deployment remains unverified. Local source packaging does not publish the application.

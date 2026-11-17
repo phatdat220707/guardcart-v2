@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import httpx
 
@@ -34,6 +35,25 @@ class FrontendServingTests(unittest.IsolatedAsyncioTestCase):
         for path in ("/.env", "/.env.example", "/backend/main.py", "/var/guardcart.sqlite3", "/%2e%2e/.env"):
             with self.subTest(path=path):
                 self.assertEqual((await self.client.get(path)).status_code, 404)
+
+    async def test_asset_mime_types_do_not_depend_on_windows_registry(self):
+        expected = {"/": "text/html", "/app.js?v=0.2.1": "text/javascript",
+                    "/format.mjs": "text/javascript", "/app.css": "text/css", "/favicon.svg": "image/svg+xml"}
+        with patch("starlette.responses.guess_type", return_value=("text/plain", None)):
+            for path, content_type in expected.items():
+                with self.subTest(path=path):
+                    response = await self.client.get(path)
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.headers["content-type"].split(";")[0], content_type)
+                    self.assertEqual(response.headers["x-content-type-options"], "nosniff")
+
+    async def test_javascript_range_response_keeps_correct_type_and_length(self):
+        with patch("starlette.responses.guess_type", return_value=("text/plain", None)):
+            response = await self.client.get("/format.mjs", headers={"Range": "bytes=0-9"})
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response.headers["content-type"].split(";")[0], "text/javascript")
+        self.assertEqual(len(response.content), 10)
+        self.assertEqual(response.headers["content-length"], "10")
 
     async def test_stable_asset_urls_revalidate_after_an_update(self):
         for path in ("/app.js?v=0.2.1", "/view-state.mjs?v=0.2.1", "/app.css?v=0.2.1"):

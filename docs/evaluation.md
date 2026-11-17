@@ -28,4 +28,4 @@ Billing and upstream model identity remain unverified. Locally observed calls an
 
 ## CI
 
-The included GitHub workflow runs offline Python tests, dataset validation, frontend checks and source-package inspection with read-only repository permission and no AI key. A separate job builds the Docker image and runs manual-only HTTP smoke. The workflow is prepared locally. GitHub execution, container runtime and the Linux/Python-version matrix are unverified until the separate v2 repository is created and the workflow actually runs.
+The [GitHub workflow](https://github.com/phatdat220707/guardcart-v2/actions/workflows/ci.yml) runs offline Python tests, dataset validation, frontend checks and source-package inspection with read-only repository permission and no AI key. A separate job builds the Docker image and runs manual-only HTTP smoke. The first run passed Linux and Docker but found a Windows MIME-type issue; the server fix and regression tests are described in [CI findings](github-ci.md). CI does not run paid model evaluation. Check the run tied to the relevant source commit rather than inferring success from the workflow file.

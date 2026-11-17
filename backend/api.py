@@ -133,10 +133,20 @@ def create_app(settings: ApiSettings | None = None, *, clock: Callable[[], datet
                 "connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["Cache-Control"] = "no-cache"
+            if response.status_code == 200:
+                response.headers["Content-Type"] = "text/html; charset=utf-8"
         elif request.url.path.endswith((".js", ".mjs", ".css", ".svg")):
             # Buildless assets retain their paths across updates; revalidate them.
             response.headers["Cache-Control"] = "no-cache"
             response.headers["X-Content-Type-Options"] = "nosniff"
+            # Windows registry MIME mappings differ between machines. Module
+            # scripts must not become text/plain when nosniff is enabled.
+            if response.status_code in (200, 206):
+                suffix = request.url.path.rsplit(".", 1)[-1]
+                response.headers["Content-Type"] = {
+                    "js": "text/javascript; charset=utf-8", "mjs": "text/javascript; charset=utf-8",
+                    "css": "text/css; charset=utf-8", "svg": "image/svg+xml",
+                }[suffix]
         return response
 
     def authenticated(request: Request, token: Annotated[str | None, Depends(cookie)],
