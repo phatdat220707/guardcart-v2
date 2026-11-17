@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A shopping assistant with clear spending permissions, grounded catalogue matches and an explainable decision trail.">
+  <meta name="theme-color" content="#f6f7f3">
+  <title>GuardCart — Shop within your rules</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css?v=0.2.1">
+  <script type="module" src="/app.js?v=0.2.1"></script>
+</head>
+<body id="top">
+  <header class="appbar">
+    <a class="brand" href="#top" aria-label="GuardCart home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 27 7v9c0 6-5 10-11 13C10 26 5 22 5 16V7Z" fill="currentColor"/><path d="m10 16 4 4 8-9" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>GuardCart<span class="version">WORKSPACE</span></a>
+    <div class="appbar-right"><span class="demo-badge">Demo catalogue · No real payments</span><span class="connection" id="connection" role="status">Connecting…</span><button class="button subtle small" id="reconnect" type="button" hidden>Reconnect</button></div>
+  </header>
+  <div class="notice" id="notice" role="alert" hidden></div>
+  <button type="button" class="button secondary small" id="recover-ai" hidden>Check previous AI request · No new model call</button>
+  <main class="workspace">
+    <aside class="rail">
+      <section class="panel chat-panel" id="chat-section" aria-labelledby="chat-title">
+        <div class="panel-heading"><div><span class="eyebrow">01 / YOUR REQUEST</span><h1 id="chat-title">What are we looking for?</h1></div><button type="button" id="clear-chat" class="text-button">New chat</button></div>
+        <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Conversation"></div>
+        <div class="examples"><button type="button" data-example="Find road running shoes for long-distance training, EU42, under HK$800 including shipping. I prefer high cushioning and a light weight.">Long-distance runner ↗</button><button type="button" data-example="Find daily running shoes under HK$600 including shipping. My size is EU42.">Everyday, under HK$600 ↗</button></div>
+        <form id="chat-form"><label class="sr-only" for="chat-input">Your shopping request</label><div class="composer"><textarea id="chat-input" rows="3" maxlength="2000" placeholder="Running shoes for long distances, EU42, under HK$800…"></textarea><button class="send-button" id="send-chat" type="submit" aria-label="Send shopping request">↗</button></div></form>
+        <div class="caption-row"><span id="ai-status">Checking AI availability…</span><span id="usage-label"></span></div>
+      </section>
+
+      <section class="panel mandate-panel" id="mandate-section" aria-labelledby="mandate-title">
+        <div class="panel-heading"><div><span class="eyebrow">02 / YOUR PERMISSION</span><h2 id="mandate-title">Set your mandate</h2></div><span class="pill neutral" id="mandate-status">Unconfirmed</span></div>
+        <p class="muted intro">A chat draft is a starting point. You decide the limits.</p>
+        <form id="mandate-form">
+          <fieldset id="mandate-fields">
+            <div class="field"><label for="budget">Maximum checkout total <span>HKD</span></label><input id="budget" name="budget" type="text" inputmode="decimal" value="800.00" required autocomplete="off"><small>Includes product, shipping and payment fees. Rewards do not increase this limit.</small></div>
+            <div class="field-grid"><div class="field"><label for="use-case">Required purpose</label><select id="use-case"><option value="">Any supported purpose</option><option value="daily_running">Daily running</option><option value="long_distance">Long-distance running</option><option value="trail_running">Trail running</option><option value="racing">Racing</option><option value="walking">Walking</option></select></div><div class="field"><label for="surface">Required surface</label><select id="surface"><option value="">Any surface</option><option value="road">Road</option><option value="trail">Trail</option><option value="indoor">Indoor</option></select></div></div>
+            <div class="field-grid"><div class="field"><label for="size">Required EU size</label><input id="size" placeholder="e.g. EU42" maxlength="12" autocomplete="off"></div><div class="field"><label for="points">Maximum points</label><input id="points" type="text" inputmode="numeric" value="0" maxlength="9"></div></div>
+            <details class="preferences" open><summary>Nice to have <span>Preferences, not hard limits</span></summary><div class="field-grid"><div class="field"><label for="cushioning">Cushioning</label><select id="cushioning"><option value="">No preference</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div><div class="field"><label for="weight-class">Weight</label><select id="weight-class"><option value="">No preference</option><option value="light">Light</option><option value="medium">Medium</option><option value="heavy">Heavy</option></select></div></div><div class="field"><label for="brand">Preferred brand</label><input id="brand" placeholder="Any demo brand" maxlength="100" autocomplete="off"></div></details>
+            <label class="checkbox-row"><input type="checkbox" id="trusted-only" checked><span>Trusted merchants only<small>Use the catalogue's verified-merchant flag.</small></span></label>
+            <div class="approval-setting"><label class="checkbox-row"><input type="checkbox" id="auto-enabled"><span>Allow automatic approval<small>Off by default. Otherwise every purchase needs your approval.</small></span></label><div class="field threshold-field" id="threshold-field" hidden><label for="threshold">Automatically approve up to <span>HKD</span></label><input id="threshold" inputmode="decimal" type="text" value="750.00" disabled></div><p class="caption" id="threshold-suggestion" hidden></p></div>
+            <div class="field"><label for="expiry">Expires <span>Your local time</span></label><input id="expiry" type="datetime-local" required></div>
+          </fieldset>
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+          <button type="submit" id="confirm-mandate" class="button primary full">Confirm mandate</button>
+          <p class="caption" id="mandate-help">One mandate permits one completed simulated purchase.</p>
+        </form>
+      </section>
+      <footer class="rail-footer">Built for clear decisions, not unlimited spending.</footer>
+    </aside>
+
+    <section class="results" id="results-section" aria-labelledby="results-title">
+      <div class="results-heading"><div><span class="eyebrow">03 / GROUNDED CHOICES</span><h2 id="results-title">Find the right fit.</h2><p id="results-subtitle">Meet your needs first. Compare the cost second.</p></div><button type="button" class="button subtle small" id="new-mandate">Start new mandate</button></div>
+      <div class="limit-strip" id="limit-strip"><div><span>Maximum spend</span><strong id="limit-budget">Not confirmed</strong></div><div><span>Approval</span><strong id="limit-approval">Always ask</strong></div><div><span>Mandate</span><strong id="limit-state">Not confirmed</strong></div></div>
+      <div class="toolbar"><button type="button" class="button primary" id="find-matches" disabled>Find matches with AI <span>↗</span></button><button type="button" class="button secondary" id="browse-catalogue">Browse catalogue</button><span class="caption" id="results-note">Confirm a mandate to find matches.</span></div>
+      <div class="busy-banner" id="busy-banner" role="status" hidden><span class="spinner" aria-hidden="true"></span><div><strong id="busy-title">Working on your request…</strong><p>Stay here while the backend checks the result. Nothing is being purchased.</p></div></div>
+      <div class="empty-results" id="empty-results"><div class="empty-mark" aria-hidden="true"><svg viewBox="0 0 96 80"><path d="M17 52h56l8-27H25" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="m10 13 11 2 9 43h43" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="68" r="4" fill="currentColor"/><circle cx="68" cy="68" r="4" fill="currentColor"/><path d="m43 33 7 7 13-15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div><span class="eyebrow">A LITTLE HELP. CLEAR LIMITS.</span><h3>Your next pair starts here.</h3><p>Describe what you need, review your mandate, then explore real decisions on a controlled demo catalogue.</p><div class="empty-steps"><span>01 Chat</span><span>02 Confirm</span><span>03 Compare</span></div></div>
+      <div class="browse-controls" id="browse-controls" hidden><label class="sr-only" for="catalogue-search">Filter demo products</label><input id="catalogue-search" placeholder="Filter by name, ID, purpose or brand…"><label for="manual-payment">Payment</label><select id="manual-payment"></select></div>
+      <div class="product-grid" id="product-grid" aria-live="polite"></div>
+      <details id="agent-trace" class="trace panel" hidden><summary>How the Agent used its tools</summary><div id="agent-trace-content"></div></details>
+
+      <div class="decision-audit-grid">
+        <section class="panel decision-panel" id="decision-section" aria-labelledby="decision-title">
+          <div class="panel-heading"><div><span class="eyebrow">04 / THE DECISION</span><h2 id="decision-title">Permission before purchase.</h2></div><span id="decision-badge" class="pill neutral">No quote</span></div>
+          <p class="muted" id="decision-description">Choose a product to see exactly what your mandate allows.</p>
+          <div class="decision-amount" id="decision-amount" hidden><span>Final checkout total</span><strong id="decision-total"></strong><small id="decision-effective"></small></div>
+          <div class="quote-caption" id="quote-caption" hidden></div>
+          <div class="decision-actions" id="decision-actions" hidden><button type="button" class="button primary" id="approve-purchase">Review & approve</button><button type="button" class="button primary" id="simulate-purchase" hidden>Simulate checkout</button><button type="button" class="button secondary" id="decline-purchase">Decline</button><button type="button" class="text-button" id="refresh-quote">Refresh quote</button></div>
+          <div class="receipt" id="receipt" hidden></div>
+          <details id="policy-details" hidden><summary>Why this decision?</summary><ul class="rule-list" id="policy-checks"></ul></details>
+          <p class="caption fineprint">All purchases and rewards are simulated. No card details or real payment are collected.</p>
+        </section>
+        <section class="panel audit-panel" aria-labelledby="audit-title"><div class="panel-heading"><div><span class="eyebrow">05 / ON THE RECORD</span><h2 id="audit-title">Activity</h2></div><button type="button" id="refresh-activity" class="text-button">Refresh</button></div><p class="caption" id="activity-summary">Your session's decisions appear here.</p><ol class="timeline" id="audit-list"></ol></section>
+      </div>
+    </section>
+  </main>
+  <nav class="mobile-nav" aria-label="Workspace sections"><a href="#chat-section">Chat</a><a href="#mandate-section">Mandate</a><a href="#results-section">Matches</a><a href="#decision-section">Decision</a></nav>
+  <dialog id="approval-dialog" aria-labelledby="approval-title"><div class="dialog-icon" aria-hidden="true">✓</div><span class="eyebrow">ONE-TIME APPROVAL</span><h2 id="approval-title">Approve this purchase?</h2><p id="approval-description"></p><strong id="approval-amount" class="dialog-amount"></strong><p class="muted">This uses your mandate once. The backend will recheck price, stock and permissions before completing the simulation.</p><p class="caption">Demo only. No real charge.</p><div class="dialog-actions"><button type="button" class="button secondary" id="approval-cancel">Go back</button><button type="button" class="button primary" id="approval-confirm">Approve & simulate</button></div></dialog>
+</body>
+</html>

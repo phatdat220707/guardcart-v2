@@ -1,0 +1,14 @@
+# Optional overlay. The ignored key file must contain only the key, not KEY=value.
+services:
+  guardcart:
+    environment:
+      GUARDCART_AI_ENABLED: "true"
+      GUARDCART_AI_API_KEY_FILE: /run/secrets/guardcart_ai_key
+      GUARDCART_AI_GLOBAL_CALL_LIMIT: "200"
+      GUARDCART_AI_SESSION_CALL_LIMIT: "40"
+    secrets:
+      - guardcart_ai_key
+
+secrets:
+  guardcart_ai_key:
+    file: ./secrets/ai-key.txt

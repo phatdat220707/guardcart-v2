@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+reports/
+var/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+releases/
+deploy/secrets/
+deploy/*.env
+!deploy/*.env.example
+

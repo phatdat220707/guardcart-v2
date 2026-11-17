@@ -1,0 +1,14 @@
+**
+!Dockerfile
+!requirements.lock
+!backend/
+!backend/**
+!data/
+!data/catalogue.json
+!frontend/
+!frontend/dist/
+!frontend/dist/**
+**/__pycache__/
+**/*.py[cod]
+**/.env
+**/*.sqlite3*
