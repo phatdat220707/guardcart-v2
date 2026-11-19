@@ -4,6 +4,8 @@ An English-language AI shopping workspace: describe a need, review an **unconfir
 
 Real LLM tool calls use a configurable Chat Completions gateway. Products, merchant flags, payments and rewards are synthetic. No real purchase is executed. The legacy hackathon repository is unchanged.
 
+**[Public demo on Render Free](https://guardcart-v2.onrender.com/)** — manual catalogue and policy/checkout workflow; AI is disabled on this hosted instance. Free hosting can sleep and resets local data on restart/redeploy. See [deployment verification and limits](docs/render-free-deployment.md). Run locally with a configured provider key to use the real AI workflows below.
+
 ## Run locally
 
 Python 3.11+. From this project directory in Windows PowerShell:
@@ -103,8 +105,8 @@ The last two require the local server. The Agent smoke permits up to four metere
 - Persisted call reservations precede provider contact. Failed/time-out attempts count. Defaults: 200 attempts per database lifetime, 40 per session, 12 per session per minute, two simultaneous runs globally and one per session.
 - Attempt limits are not a verified USD spending cap. Gateway token/credit reports are not assumed to equal dollars paid. Resetting the database resets local quotas.
 - Anonymous sessions expire after 24 hours by default and have no account recovery. Browser storage contains workspace IDs; the bearer cookie is HttpOnly. Chat history is stored in local SQLite for context.
-- SQLite is appropriate for this single-instance demo. Public hosting, production operations, account authentication and distributed throttling remain future work.
-- Sampled browser flows passed at 1280 px desktop and 390 px mobile emulation. Repeatable browser CI, full accessibility, actual-device and public-host checks remain outstanding. The repository is private; no public v2 website URL exists yet.
+- SQLite is used by this single-instance demo. On Render Free it is ephemeral; persistent production storage, account authentication and distributed throttling remain future work.
+- Sampled local desktop/mobile and public HTTPS manual flows passed. Repeatable browser CI, full accessibility, actual-device and long-term hosting checks remain outstanding. The repository is private and the demo URL is public.
 
 ## Source map
 
@@ -123,4 +125,4 @@ Runtime dependencies: Pydantic, FastAPI, Uvicorn and HTTPX. The frontend uses br
 
 ## Deployment package
 
-See [deployment preparation](docs/deployment.md) for the pinned runtime snapshot, portable entry point, Docker/Compose configuration, mounted AI key and source-only release command. The first GitHub container job built and passed HTTP smoke. A public host has not been selected; public HTTPS deployment remains unverified. Local source packaging does not publish the application.
+See [deployment preparation](docs/deployment.md) for the pinned runtime snapshot, portable entry point, Docker/Compose configuration, mounted AI key and source-only release command. GitHub container checks passed and the [Render Free manual demo](docs/render-free-deployment.md) was verified over HTTPS. Local source packaging remains separate from publishing.
