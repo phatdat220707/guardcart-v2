@@ -61,6 +61,22 @@ The overlay mounts the key at `/run/secrets/guardcart_ai_key` and enables AI del
 
 ## Public host requirements
 
+### Render setup
+
+Use a Docker Web Service with branch `main`, Singapore, one instance and a 1 GB persistent disk mounted at `/data`. Select deployment after CI checks pass and health path `/api/health`. Leave Docker command/build context/root directory overrides empty so the tested Dockerfile starts the service.
+
+Runtime settings for the first manual-only deployment:
+
+```text
+GUARDCART_ENVIRONMENT=production
+GUARDCART_SECURE_COOKIES=true
+GUARDCART_DATABASE_PATH=/data/guardcart.sqlite3
+GUARDCART_AI_ENABLED=false
+PORT=10000
+```
+
+When `RENDER=true`, production defaults derive the exact HTTPS origin and host from Render's documented `RENDER_EXTERNAL_HOSTNAME`, validated as a single `onrender.com` hostname. No wildcard origin is used. Explicit GuardCart origin/host settings override these defaults, for example when adding a custom domain. See [Render runtime metadata](https://render.com/docs/environment-variables). Only the runtime database directory is mounted; local session data and provider keys are not uploaded with the image. Add an AI runtime secret separately after verifying the manual HTTPS flow.
+
 Use `deploy/production.env.example` as a template in the chosen host's runtime settings. It is not a deploy command and the example domain is not an actual v2 URL.
 
 1. One running instance and one worker with a durable writable `/data` directory owned by UID/GID 10001. Keep SQLite's database, WAL and shared-memory files together. See [Docker volume lifecycle](https://docs.docker.com/engine/storage/volumes/).

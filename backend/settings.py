@@ -1,6 +1,7 @@
 """Non-secret transport configuration; this module never reads the AI key."""
 
 import os
+import re
 from pathlib import Path
 from typing import Annotated, Literal, Self
 from urllib.parse import urlparse
@@ -54,6 +55,14 @@ class ApiSettings(Contract):
     def from_environment(cls):
         environment = os.environ.get("GUARDCART_ENVIRONMENT", "development")
         values = {"environment": environment, "secure_cookies": environment == "production"}
+        # Render assigns the final hostname; do not guess it from the service name.
+        # Only explicit platform metadata can supply these production defaults.
+        render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
+        if environment == "production" and os.environ.get("RENDER") == "true" and render_host:
+            if not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com", render_host):
+                raise ValueError("Invalid Render hostname metadata.")
+            values["allowed_origins"] = ("https://" + render_host,)
+            values["allowed_hosts"] = (render_host, "127.0.0.1", "localhost")
         for name, field in (("GUARDCART_DATABASE_PATH", "database_path"),):
             if name in os.environ:
                 values[field] = os.environ[name]

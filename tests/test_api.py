@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 import tempfile
 import unittest
+import os
 from unittest.mock import patch
 
 import httpx
@@ -339,6 +340,24 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ApiSettingsTests(unittest.TestCase):
+    def test_render_production_defaults_use_exact_platform_hostname(self):
+        environment = {"GUARDCART_ENVIRONMENT": "production", "RENDER": "true", "RENDER_EXTERNAL_HOSTNAME": "guardcart-test.onrender.com"}
+        with patch.dict(os.environ, environment, clear=True):
+            settings = ApiSettings.from_environment()
+        self.assertEqual(settings.allowed_origins, ("https://guardcart-test.onrender.com",))
+        self.assertIn("guardcart-test.onrender.com", settings.allowed_hosts)
+        self.assertTrue(settings.secure_cookies)
+        with patch.dict(os.environ, {**environment, "GUARDCART_ALLOWED_ORIGINS": "https://shop.example.test", "GUARDCART_ALLOWED_HOSTS": "shop.example.test"}, clear=True):
+            custom = ApiSettings.from_environment()
+        self.assertEqual(custom.allowed_origins, ("https://shop.example.test",))
+        self.assertEqual(custom.allowed_hosts, ("shop.example.test",))
+
+    def test_render_metadata_rejects_urls_and_untrusted_host_patterns(self):
+        for host in ("https://guardcart.onrender.com", "*.onrender.com", "evil.test", "guardcart.onrender.com/path", "guardcart.onrender.com.evil.test"):
+            with self.subTest(host=host), patch.dict(os.environ, {"GUARDCART_ENVIRONMENT": "production", "RENDER": "true", "RENDER_EXTERNAL_HOSTNAME": host}, clear=True):
+                with self.assertRaises(ValueError):
+                    ApiSettings.from_environment()
+
     def test_invalid_origins_and_wildcards_are_rejected(self):
         for origin in ("*", "null", "http://localhost/path", "https://user:pass@example.test", "http://localhost?x=1"):
             with self.subTest(origin=origin), self.assertRaises(ValidationError):
